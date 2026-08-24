@@ -1,13 +1,21 @@
 [project]
-name = "claude-rig"
+name = "unclaude"
 version = "0.1.0"
-description = "One-command unlimited-feeling Claude Code — free pools, headroom routing, local floor (Phase-0 scaffold)"
+description = "One-command unlimited-feeling Claude Code — free pools, headroom routing, local floor"
 readme = "README.md"
 requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "demolished-lab", email = "hello@demolished-lab.com" }]
+keywords = ["claude", "llm", "gateway", "free-tier"]
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/demolished-lab/unclaude"
+Repository = "https://github.com/demolished-lab/unclaude"
 
 [project.scripts]
 rig = "rig.cli:main"
+unclaude = "rig.cli:main"
 
 [tool.ruff]
 line-length = 100

@@ -1,73 +1,116 @@
-# Claude Rig — One-Command Unlimited Claude
+# UnClaude — One Command, Unlimited Claude
 
-**Status:** Draft — docs-first foundation · Phase 0 pending approval
-**Owner:** Raja (@Raja) · Product to ship as public GitHub repo
-**References:** PRD.md · BLUEPRINT.md · DESIGN-BRIEF.md · SECURITY-AUDIT.md · `rig/` (Phase-0 scaffold)
-**License:** MIT (repo), provider ToS respected (no account farming)
+> Free pools, headroom routing, local fallback. No `claude.ai` billing. Just `claude`.
 
-> **Locked scope:** Fully-free-first GitHub product. One command → auto-detects machine (OS/RAM/disk/GPU) → bootstraps Free Claude Code gateway + RTK + Caveman + ECC → wires 6+ free provider pools behind one local key → quota-aware headroom routing → local Ollama fallback as infinite floor. Paid keys are strictly opt-in (user pastes, never required). Every anomaly — free-list churn, 401/402/403/413/429, gateway down, disk low, model deprecation — is handled autonomously via corner toast + one-click browser + paste-panel; rest is hands-free. Background research runs on a tiny fraction of session tokens, never dazing output quality, dynamically fetching token-optimized data across the internet.
+[![CI](https://github.com/demolished-lab/unclaude/actions/workflows/ci.yml/badge.svg)](https://github.com/demolished-lab/unclaude/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](pyproject.toml)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](#install)
 
-## What this is
+**UnClaude** gives you a *feels-unlimited* Claude Code without touching `claude.ai` billing. One command auto-detects your machine (OS/RAM/disk), bootstraps a local gateway that aggregates 6+ free provider pools behind one key, and routes with quota-aware headroom. When a free tier dies, a toast pops at your corner — click *Open key page* (already logged in), paste, hit Enter. Done. A `qwen2.5:0.5b` local model catches you when the internet pools thin. Background research spends <2% of session tokens to keep routes optimal.
 
-Claude Rig gives any developer a *feels-unlimited* Claude Code without touching `claude.ai` billing. You run one command in a fresh terminal, approve a few OS pop-ups (paste free API keys when asked), and `claude` just works — task-tier routing picks the strongest free model for the job, fallbacks burn the deepest free pools first, and a local model catches you when the internet pools thin. A background research lane spends <2% of session tokens to continuously discover better free routes and token-optimization intel.
+Inspired by [Free Claude Code](https://github.com/Alishahryar1/free-claude-code), [RTK](https://github.com/rtk-ai/rtk), [Caveman](https://github.com/JuliusBrussee/caveman) and [ECC](https://github.com/affaan-m/ECC) — but fully autonomous for any device.
 
-This repo's rig (your current `C:\Users\Raja` setup) stays untouched. `claude-rig` is a separate, production-grade product that *learns from* that rig.
+---
 
-## Document map
+## 60-Second Start
 
-| Doc | Governs | Precedence |
-|---|---|---|
-| `README.md` (this) | Entry + working contract | — |
-| `PRD.md` | *What* we ship (FR-x.y + AC) | Wins on requirements |
-| `BLUEPRINT.md` | *How* it's wired (layers, routing, anomaly matrix, meta-engine) | Wins on wiring |
-| `DESIGN-BRIEF.md` | *How it looks/feels* (every pixel, tokens, flows) | Wins on UI |
-| `SECURITY-AUDIT.md` | *What must be true before launch* (gates G1–G7) | Blocks launch |
-| `rig/` | Phase-0 scaffold (stdlib-only, meta-engine skeleton) | Must match docs |
-
-Cross-links are bidirectional; PRD ↔ Blueprint ↔ Design Brief contradictions are resolved by precedence above.
-
-## Working contract
-
-- **Docs before code.** No feature ships unless PRD says so. Doc change ⇒ deliberate, acknowledged.
-- **Docs are truth.** Code matches docs, never reverse.
-- **No silent changes.** Guardrails never quietly loosened.
-- **Nothing unattended that can hurt.** No auto-account creation, no multi-account bypass, no scraping that violates provider ToS, no crypto.
-- **Free-first, paid-opt-in.** Free tiers are the product; paid keys are a user choice, never a dark pattern.
-
-## Locked decisions
-
-- Fully-free product; paid keys are optional, user-supplied, encrypted at rest, never required for basic power.
-- One-command install: `install.ps1` (Windows) / `install.sh` (macOS/Linux/WSL) → device detection → gateway + watchdog + `claude` shim.
-- Effortless UX: OS corner toast → *Open key page* (already logged in) → paste into panel → Enter — no searching, no docs hunting.
-- Background research lane: dynamic, internet-wide, token-optimized, <2% of session budget, never degrades output.
-- Local infinite floor (Ollama `llama3.2:1b` / `qwen2.5:0.5b` class) as final fallback when remote pools exhaust.
-- 6 verified free pools at launch: Gemini, NVIDIA NIM, Groq, Cloudflare AI, OpenRouter `:free`, Ollama Cloud (+ Cerebras/GitHub Models when user opts in).
-
-## Open questions
-
-- OQ-1: Default daily token budget — 2M fixed or device-scaled (RAM/disk)? **Default:** 2M, auto-scales +20% per 8GB RAM above 16GB (see PRD OQ-1).
-- OQ-2: Provider daily limits — hard-code estimates vs live probe calibration? **Default:** hard-coded estimates + nightly latency probe as tie-breaker (BLUEPRINT §3.2).
-- OQ-3: Telemetry — opt-in anonymous headroom stats to improve free-model ranking? **Default:** off, consent-gated (PRD FR-9.3).
-- OQ-4: Corporate proxy / offline-first — support air-gapped local-only mode? **Default:** v2.
-- OQ-5: Windows toast vs in-TUI prompt — OS toast is primary (visible when Claude not running); should we also mirror inside Claude Code TUI? **Default:** OS primary, TUI mirror v2.
-
-## Current status
-
-- Specified: this README + PRD + Blueprint + Design Brief + Security Audit (in progress)
-- Scaffolded (Phase 0): `rig/` — meta-engine skeleton (detect→triage→plan→rehearse→apply→verify→learn) with open-ended ANON taxonomy
-- Pending: owner approval of OQ-1..OQ-5; then `install.sh/ps1` + cross-platform watchdog (`rig/watchdog/`)
-- Open questions: OQ-1..OQ-5 above
-
-## 60-second promise (after install)
-
+**Windows (PowerShell)**
 ```powershell
-# Windows
-irm https://raw.githubusercontent.com/<you>/claude-rig/main/install.ps1 | iex
-# macOS/Linux/WSL
-curl -fsSL https://raw.githubusercontent.com/<you>/claude-rig/main/install.sh | bash
-
-# then just
-claude
-# → if a key is needed: toast pops → click "Open key page" → paste → Enter → done
-# → `claude.exe` still bypasses to direct Anthropic
+irm https://raw.githubusercontent.com/demolished-lab/unclaude/main/install.ps1 | iex
 ```
+
+**macOS / Linux / WSL**
+```bash
+curl -fsSL https://raw.githubusercontent.com/demolished-lab/unclaude/main/install.sh | bash
+```
+
+Then just:
+```bash
+claude              # your rig — 6 free pools + local fallback
+claude.exe          # bypass — direct Anthropic
+```
+
+If a key is needed, a corner toast appears → **Open key page** → paste → **Enter**. No docs hunting.
+
+---
+
+## What You Get
+
+| Layer | What | Why |
+|---|---|---|
+| **Gateway** | FCC 5.13.10 at `127.0.0.1:8082` | One local key for 6 pools |
+| **Providers** | Gemini · NVIDIA NIM · Groq · Cloudflare AI · OpenRouter `:free` · Ollama Cloud + local `ollama` | ~230 genuinely-free chat models, 555 total catalog |
+| **Routing** | Tier primaries (`MODEL_FABLE/OPUS/SONNET/HAIKU`) → fallback chain reordered by headroom% + latency | Burns deepest pools first, re-ascends after daily reset |
+| **Floor** | `ollama/llama3.2:1b` (1.3GB, 16GB RAM) — device-scaled | Infinite when remote pools thin |
+| **Compression** | RTK (input, ~80%) + Caveman (output, ~65%) | 3-5x more free tokens per day |
+| **Discipline** | ECC 2.2.0 — 68 agents, 286 skills | TDD/review/planning loops |
+| **Watchdog** | 10-min cycle, headroom-aware, catalog heal | Toast + paste-panel, disk guard, token alarm |
+
+---
+
+## Architecture
+
+```mermaid
+flowchart TD
+    U[claude in terminal] --> S[shim: health probe → fcc-claude]
+    S --> C[RTK + Caveman + ECC]
+    C --> G[FCC 127.0.0.1:8082 /v1/messages]
+    G --> R{Headroom Router}
+    R -->|tier primary| P1[Gemini 3.7]
+    R -->|fallback 1| P2[Cloudflare gpt-oss-120b]
+    R -->|fallback 2| P3[Ollama Ultra]
+    R -->|fallback 3| P4[Groq gpt-oss-120b]
+    R -->|fallback 4| P5[OpenRouter GLM-5.2:free]
+    R -->|fallback 5| P6[NIM Nemotron]
+    R -->|floor| P7[ollama/llama3.2:1b local]
+    W[Watchdog 10min] -.-> R
+    W -.->|toast+dialog| U
+    B[Research sidecar <2%] -.->|brief.md| R
+```
+
+---
+
+## Device Adaptive
+
+| RAM | Daily budget | Local model |
+|---|---|---|
+| 8-12 GB | 1.5M tokens | `qwen2.5:0.5b` (397 MB) |
+| 16 GB | 2.0M | `llama3.2:1b` (1.3 GB) |
+| 32 GB+ | 2.5M | `qwen3:8b` (5.2 GB) |
+
+Disk guard warns at <15 GB free (C: 25GB / E: 18GB on reference box).
+
+---
+
+## Docs
+
+| Doc | Governs |
+|---|---|
+| [PRD.md](PRD.md) | What we ship (FR-1.1..FR-11.2) |
+| [BLUEPRINT.md](BLUEPRINT.md) | How it's wired (routing, anomaly matrix, meta-engine) |
+| [DESIGN-BRIEF.md](DESIGN-BRIEF.md) | How it looks (tokens, S-1..S-7, flows) |
+| [SECURITY-AUDIT.md](SECURITY-AUDIT.md) | Gates G-1..G-7 (must pass before release) |
+| [rig/](rig/) | Phase-0 scaffold + watchdog |
+
+---
+
+## Verify
+
+```bash
+python -m rig.cli scan --dry-run
+python -m rig.watchdog.watchdog --once --dry-run
+python rig/detect/device.py
+```
+
+Dashboard: `http://127.0.0.1:8082/admin` — see which provider actually served.
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE). Provider ToS respected, no account farming.
+
+## Acknowledgments
+
+Built on [Free Claude Code](https://github.com/Alishahryar1/free-claude-code), [RTK](https://github.com/rtk-ai/rtk), [Caveman](https://github.com/JuliusBrussee/caveman), [ECC](https://github.com/affaan-m/ECC). Maintained by [demolished-lab](https://github.com/demolished-lab).
