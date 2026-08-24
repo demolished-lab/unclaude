@@ -1,0 +1,25 @@
+{
+  "description": "Claude Rig hooks — research sidecar (<2%) + ultimate-power, never dazes main turn",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python rig/research/researcher.py --budget 4000 --appendix",
+            "timeout": 30000
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "rtk hook claude" }
+        ]
+      }
+    ]
+  }
+}

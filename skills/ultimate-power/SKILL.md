@@ -1,3 +1,9 @@
+---
+name: ultimate-power
+description: Background optimizer — thinks how to get ultimate free power source without hurting quality. Sidecar only, <2% of session tokens, never dazes main turn.
+allowed-tools: Read, Write, Bash
+---
+
 # Ultimate Power — Background Optimizer
 
 **Purpose:** Make Claude think, in background, how to get the ultimate free power source without dazing output quality. PRD locked scope: <2% of session tokens, sidecar only.

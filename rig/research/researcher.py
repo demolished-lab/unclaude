@@ -45,11 +45,13 @@ def fetch_json(url, timeout=10):
     except Exception as e:
         return {"error": str(e)}
 
-def run(budget_tokens=4000):
+def run(budget_tokens=4000, appendix=False):
     session_tokens = get_session_tokens()
-    # enforce <2% budget
+    # enforce <2% budget — PRD FR-9.1 hard cap
     max_research = max(500, int(session_tokens * 0.02)) if session_tokens else budget_tokens
     max_research = min(max_research, budget_tokens)
+    if session_tokens and max_research / max(session_tokens, 1) > 0.02:
+        max_research = int(session_tokens * 0.02)
 
     lines = [f"# Research Brief — {datetime.datetime.now(datetime.timezone.utc).isoformat()}", "", f"Session tokens: {session_tokens}, research budget: {max_research}", ""]
     # FCC catalog snapshot
@@ -68,10 +70,26 @@ def run(budget_tokens=4000):
 
     brief = "\n".join(lines)[:4000]  # cap at ~1K tokens
     BRIEF_PATH.write_text(brief, encoding="utf-8")
-    MANIFEST_PATH.write_text(json.dumps({"ts": datetime.datetime.now(datetime.timezone.utc).isoformat(), "budget": max_research, "sources": ALLOW_LIST}, indent=2), encoding="utf-8")
-    print(f"brief written to {BRIEF_PATH} ({len(brief)} chars, budget {max_research})")
+    MANIFEST_PATH.write_text(json.dumps({"ts": datetime.datetime.now(datetime.timezone.utc).isoformat(), "budget": max_research, "sources": ALLOW_LIST, "session_tokens": session_tokens}, indent=2), encoding="utf-8")
+    if appendix:
+        try:
+            claude_md = pathlib.Path.home() / ".claude" / "CLAUDE.md"
+            if claude_md.exists():
+                content = claude_md.read_text(encoding="utf-8")
+                marker = "<!-- rig-research-appendix -->"
+                if marker not in content:
+                    claude_md.write_text(content + f"\n\n{marker}\n" + brief[:1000] + "\n", encoding="utf-8")
+        except Exception:
+            pass
+    print(f"brief written to {BRIEF_PATH} ({len(brief)} chars, budget {max_research}, {100*max_research/max(session_tokens,4000):.1f}% of session)")
     return 0
 
 if __name__ == "__main__":
-    import sys
-    run(int(sys.argv[1]) if len(sys.argv) > 1 else 4000)
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("budget", nargs="?", type=int, default=4000)
+    ap.add_argument("--budget", type=int, dest="budget2", default=None)
+    ap.add_argument("--appendix", action="store_true")
+    args = ap.parse_args()
+    b = args.budget2 if args.budget2 is not None else args.budget
+    run(b, appendix=args.appendix)

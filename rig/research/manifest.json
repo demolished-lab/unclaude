@@ -1,10 +1,11 @@
 {
-  "ts": "2026-08-24T17:48:51.932933+00:00",
+  "ts": "2026-08-24T17:53:42.301863+00:00",
   "budget": 4000,
   "sources": [
     "https://api.github.com/repos/Alishahryar1/free-claude-code/releases/latest",
     "https://api.github.com/repos/rtk-ai/rtk/releases/latest",
     "https://api.github.com/repos/JuliusBrussee/caveman/releases/latest",
     "https://api.github.com/repos/affaan-m/ECC/releases/latest"
-  ]
+  ],
+  "session_tokens": 265120
 }

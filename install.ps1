@@ -71,7 +71,19 @@ if (Test-Path $skillSrc) {
     Copy-Item "$skillSrc\*" $sDst -Recurse -Force
     Write-Host "Skill: ultimate-power"
 }
-Write-Step "Claude shim (claude -> fcc-claude)"
+Write-Step "Hooks (research sidecar <2%)"
+$hooksDir = "$env:USERPROFILE\.claude\hooks"
+New-Item -ItemType Directory -Force -Path $hooksDir | Out-Null
+$researchHook = Join-Path $hooksDir "hooks.json"
+$researchPy = "$env:USERPROFILE\.claude\rig-research\researcher.py"
+$hookContent = @{
+    hooks = @{
+        SessionStart = @(@{ matcher = ""; hooks = @(@{ type = "command"; command = "python `"$researchPy`" --appendix"; timeout = 30000 }) })
+        PreToolUse = @(@{ matcher = "Bash"; hooks = @(@{ type = "command"; command = "rtk hook claude" }) })
+    }
+} | ConvertTo-Json -Depth 6
+$hookContent | Set-Content -Path $researchHook -Encoding UTF8
+Write-Host "Hooks: $researchHook"
 $profilePath = $PROFILE; if (-not (Test-Path $profilePath)) { New-Item -ItemType File -Force -Path $profilePath | Out-Null }
 $hasShim = $false; try { $hasShim = Select-String -Path $profilePath -Pattern 'function claude' -Quiet -ErrorAction SilentlyContinue } catch {}
 if ($hasShim) {
