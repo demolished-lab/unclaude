@@ -16,7 +16,8 @@ def detect():
                             ("ullTotalPageFile", ctypes.c_ulonglong), ("ullAvailPageFile", ctypes.c_ulonglong),
                             ("ullTotalVirtual", ctypes.c_ulonglong), ("ullAvailVirtual", ctypes.c_ulonglong),
                             ("ullAvailExtendedVirtual", ctypes.c_ulonglong)]
-            s = MEMSTAT(); s.dwLength = ctypes.sizeof(MEMSTAT)
+            s = MEMSTAT()
+            s.dwLength = ctypes.sizeof(MEMSTAT)
             ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(s))
             ram_gb = round(s.ullTotalPhys / (1024**3))
         else:

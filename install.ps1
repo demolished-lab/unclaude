@@ -56,6 +56,21 @@ if (-not (Test-Path $startup)) {
 }
 if ($wdToRun -like "*.py") { Start-Process python.exe -ArgumentList "`"$wdToRun`"" -WindowStyle Hidden -ErrorAction SilentlyContinue } else { Start-Process powershell.exe -ArgumentList '-WindowStyle Hidden -ExecutionPolicy Bypass -STA -File "'+$wdToRun+'"' -WindowStyle Hidden -ErrorAction SilentlyContinue }
 Write-Host "Watchdog running"
+Write-Step "Research lane + ultimate-power skill (<2% sidecar)"
+$researchSrc = Join-Path $PSScriptRoot "rig\research"
+if (Test-Path $researchSrc) {
+    $rDst = "$env:USERPROFILE\.claude\rig-research"
+    New-Item -ItemType Directory -Force -Path $rDst | Out-Null
+    Copy-Item "$researchSrc\*" $rDst -Recurse -Force
+    Write-Host "Research lane: $rDst"
+}
+$skillSrc = Join-Path $PSScriptRoot "skills\ultimate-power"
+if (Test-Path $skillSrc) {
+    $sDst = "$env:USERPROFILE\.claude\skills\ultimate-power"
+    New-Item -ItemType Directory -Force -Path $sDst | Out-Null
+    Copy-Item "$skillSrc\*" $sDst -Recurse -Force
+    Write-Host "Skill: ultimate-power"
+}
 Write-Step "Claude shim (claude -> fcc-claude)"
 $profilePath = $PROFILE; if (-not (Test-Path $profilePath)) { New-Item -ItemType File -Force -Path $profilePath | Out-Null }
 $hasShim = $false; try { $hasShim = Select-String -Path $profilePath -Pattern 'function claude' -Quiet -ErrorAction SilentlyContinue } catch {}

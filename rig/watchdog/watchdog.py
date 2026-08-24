@@ -67,21 +67,34 @@ def notify(title, msg):
         pass
     print(f"[NOTIFY] {title}: {msg}")
 
-def fcc_get(path, timeout=20):
-    with urllib.request.urlopen(FCC_BASE + path, timeout=timeout) as r:
-        return json.loads(r.read())
+def fcc_get(path, timeout=20, retries=3):
+    for i in range(retries):
+        try:
+            with urllib.request.urlopen(FCC_BASE + path, timeout=timeout) as r:
+                return json.loads(r.read())
+        except Exception as e:
+            if i == retries - 1:
+                raise
+            time.sleep(1.5 ** i)
 
-def fcc_apply(values):
+def fcc_apply(values, retries=2):
     payload = json.dumps({"values": values}).encode()
-    req = urllib.request.Request(FCC_BASE + "/admin/api/config/validate", data=payload, headers={"Content-Type": "application/json"}, method="POST")
-    with urllib.request.urlopen(req, timeout=30) as r:
-        v = json.loads(r.read())
-    if not v.get("valid"):
-        return False, v.get("errors")
-    req = urllib.request.Request(FCC_BASE + "/admin/api/config/apply", data=payload, headers={"Content-Type": "application/json"}, method="POST")
-    with urllib.request.urlopen(req, timeout=30) as r:
-        a = json.loads(r.read())
-    return bool(a.get("applied")), []
+    for i in range(retries):
+        try:
+            req = urllib.request.Request(FCC_BASE + "/admin/api/config/validate", data=payload, headers={"Content-Type": "application/json"}, method="POST")
+            with urllib.request.urlopen(req, timeout=30) as r:
+                v = json.loads(r.read())
+            if not v.get("valid"):
+                return False, v.get("errors")
+            req = urllib.request.Request(FCC_BASE + "/admin/api/config/apply", data=payload, headers={"Content-Type": "application/json"}, method="POST")
+            with urllib.request.urlopen(req, timeout=30) as r:
+                a = json.loads(r.read())
+            return bool(a.get("applied")), []
+        except Exception as e:
+            if i == retries - 1:
+                return False, [str(e)]
+            time.sleep(1.5 ** i)
+    return False, ["retries exhausted"]
 
 def load_state():
     if STATE_FILE.exists():
