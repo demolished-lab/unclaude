@@ -1,0 +1,13 @@
+[project]
+name = "claude-rig"
+version = "0.1.0"
+description = "One-command unlimited-feeling Claude Code — free pools, headroom routing, local floor (Phase-0 scaffold)"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+rig = "rig.cli:main"
+
+[tool.ruff]
+line-length = 100
